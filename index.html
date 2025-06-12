@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Guess the Ticker – TradingWithLu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+  /* Retro grid background (pulse animation) */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: -1;
+    animation: pulseGrid 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes pulseGrid {
+    0%, 100% {
+      opacity: 0.03;
+    }
+    50% {
+      opacity: 0.07;
+    }
+  }
+
+  :root {
+    --bg: #002f4a;
+    --text-light: #fff8e1;
+    --text-muted: #f4ede3;
+    --accent: #ffc914;
+    --accent-2: #e86a33;
+  }
+
+  body {
+    font-family: 'Courier New', monospace;
+    background-color: var(--bg);
+    color: var(--text-light);
+    margin: 0;
+    padding: 20px 20px 100px;
+    text-align: center;
+    position: relative; /* Ensures ::before appears */
+    overflow-x: hidden;
+    z-index: 0;
+  }
+
+  h1 {
+  color: var(--accent);
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  font-family: 'Courier New', monospace; /* add this */
+  text-transform: uppercase; /* optional: makes it look like arcade headers */
+  letter-spacing: 1px;        /* gives a digital scoreboard feel */
+}
+
+
+  .menu-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 999;
+  }
+
+  .menu-container button {
+    background: none;
+    border: none;
+    font-size: 2.5rem;
+    cursor: pointer;
+    color: inherit;
+  }
+
+  #menu {
+    display: none;
+    position: absolute;
+    top: 40px;
+    left: 0;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 12px;
+    border-radius: 8px;
+    min-width: 180px;
+  }
+
+  #menu a {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    margin-bottom: 10px;
+    font-size: 1rem;
+  }
+
+  .logo {
+    display: block;
+    margin: 0 auto 10px;
+    max-width: 100px;
+  }
+
+  .game-box {
+    background-color: #001e2f;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 400px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  .company {
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+
+  input {
+    padding: 10px;
+    font-size: 1.2rem;
+    width: 70%;
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .button-group {
+    margin-top: 10px;
+  }
+
+  button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: var(--accent-2);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  margin: 5px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace; /* ensure it's set */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+
+  .feedback {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    height: 25px;
+  }
+
+  .scoreboard {
+    margin-top: 20px;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 10px 0;
+    border-top: 1px dashed var(--accent);
+    border-bottom: 1px dashed var(--accent);
+  }
+
+  .scoreboard div {
+    flex: 1 1 25%;
+    margin: 5px 0;
+  }
+
+  .timer-bar-container {
+    background-color: #333;
+    border-radius: 6px;
+    height: 12px;
+    width: 100%;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+
+  .timer-bar {
+    height: 100%;
+    width: 100%;
+    background-color: var(--accent);
+    transition: width 1s linear;
+  }
+
+  footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #001e2f;
+    padding: 20px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  footer a {
+    color: var(--accent);
+    margin: 0 10px;
+    text-decoration: none;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    font-family: 'Courier New', monospace;
+  }
+
+  .modal-content {
+    background: #001e2f;
+    padding: 30px;
+    border-radius: 10px;
+    color: var(--text-light);
+    max-width: 300px;
+    width: 80%;
+    text-align: center;
+  }
+
+  .modal-content h2 {
+    margin-top: 0;
+    color: var(--accent);
+  }
+
+  .modal-content .small-links {
+    font-size: 0.75rem;
+    margin-top: 20px;
+  }
+
+  .modal-content .small-links a {
+    color: var(--accent);
+    text-decoration: none;
+    margin: 0 5px;
+  }
+</style>
+
+</head>
+
+<body>
+<audio id="coinSound" src="coin-drop.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="wrong-answer.mp3" preload="auto"></audio>
+
+
+  <div class="menu-container">
+    <button onclick="toggleMenu()">☰</button>
+    <div id="menu">
+      <a href="https://tradingwithlu.com" target="_blank">🏠 Home</a>
+      <a href="https://quest.tradingwithlu.com" target="_blank">🧠 Trader Archetype Quest</a>
+    </div>
+  </div>
+
+  <img src="big logo copy.png" alt="TradingWithLu Logo" class="logo">
+  <h1>🟡 NAME THAT TICKER 🟡</h1>
+
+  <div class="game-box">
+    <p class="company" id="companyName">Loading...</p>
+    <input type="text" id="userInput" placeholder="Enter ticker" />
+    <div class="button-group">
+      <button onclick="checkAnswer()">Submit</button>
+      <button onclick="togglePause()" id="pauseBtn">Pause</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="scoreboard">
+  <div>🎮 Score: <span id="score">0</span></div>
+  <div>🏆 High: <span id="highScore">0</span></div>
+  <div>🔥 Streak: <span id="streak">0</span></div>
+</div>
+<div class="timer-label">⏱ Time Remaining: <span id="timer">5</span>s</div>
+<div class="timer-bar-container">
+  <div class="timer-bar" id="timerBar">
+</div>
+</div>
+
+ <footer style="position: fixed; left: 0; bottom: 0; width: 100%; background: #001e2f; padding: 20px; color: #f4ede3; font-size: 0.9rem; text-align: center; box-sizing: border-box;">
+  © 2025 TradingWithLu ·
+  <a href="https://tradingwithlu.com" target="_blank" style="color: #ffc914; margin: 0 10px; text-decoration: none;">Website</a> ·
+  <a href="https://x.com/tradingwithlu" target="_blank" style="color: #ffc914; margin: 0 10px; text-decoration: none;">X</a> ·
+  <a href="https://tiktok.com/@tradingwithluu" target="_blank" style="color: #ffc914; margin: 0 10px; text-decoration: none;">TikTok</a>
+</footer>
+
+
+ <div class="modal" id="gameOverModal">
+  <div class="modal-content">
+    <h2>Game Over</h2>
+    <p class="quote" id="quoteDisplay">"Discipline is doing what needs to be done, even when you don’t feel like doing it."</p>
+    <p>🎮Your final score: <span id="finalScore">0</span></p>
+    <p>🔥Your final streak: <span id="finalStreak">0</span></p>
+    <button onclick="resumeGame()">Play Again</button>
+    <button onclick="shareScore()">Share</button>
+    <div class="small-links">
+      Powered by <strong>TradingWithLu</strong><br>
+      <a href="https://tradingwithlu.com" target="_blank">Website</a> ·
+      <a href="https://X.com/tradingwithlu" target="_blank">X</a> ·
+      <a href="https://tiktok.com/@tradingwithluu" target="_blank">TikTok</a>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('menu');
+    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+  }
+
+  document.addEventListener('click', function(event) {
+    const menu = document.getElementById('menu');
+    const button = event.target.closest('button');
+    if (!event.target.closest('#menu') && !button) {
+      menu.style.display = 'none';
+    }
+  });
+
+  const companies = [
+  { name: "Apple", ticker: "AAPL" },
+  { name: "Microsoft", ticker: "MSFT" },
+  { name: "Amazon", ticker: "AMZN" },
+  { name: "Nvidia", ticker: "NVDA" },
+  { name: "Meta Platforms", ticker: "META" },
+  { name: "Alphabet (Class A)", ticker: "GOOGL" },
+  { name: "Berkshire Hathaway", ticker: "BRK.B" },
+  { name: "Tesla", ticker: "TSLA" },
+  { name: "UnitedHealth Group", ticker: "UNH" },
+  { name: "Eli Lilly", ticker: "LLY" },
+  { name: "JPMorgan Chase", ticker: "JPM" },
+  { name: "Johnson & Johnson", ticker: "JNJ" },
+  { name: "Visa", ticker: "V" },
+  { name: "Exxon Mobil", ticker: "XOM" },
+  { name: "Procter & Gamble", ticker: "PG" },
+  { name: "Broadcom", ticker: "AVGO" },
+  { name: "Mastercard", ticker: "MA" },
+  { name: "Home Depot", ticker: "HD" },
+  { name: "Chevron", ticker: "CVX" },
+  { name: "Costco Wholesale", ticker: "COST" },
+  { name: "PepsiCo", ticker: "PEP" },
+  { name: "The Coca-Cola Company", ticker: "KO" },
+  { name: "AbbVie", ticker: "ABBV" },
+  { name: "Pfizer", ticker: "PFE" },
+  { name: "Walmart", ticker: "WMT" },
+  { name: "McDonald's", ticker: "MCD" },
+  { name: "The Walt Disney Company", ticker: "DIS" },
+  { name: "Nike", ticker: "NKE" },
+  { name: "Intel", ticker: "INTC" },
+  { name: "Advanced Micro Devices", ticker: "AMD" },
+  { name: "Netflix", ticker: "NFLX" },
+  { name: "Cisco Systems", ticker: "CSCO" },
+  { name: "Salesforce", ticker: "CRM" },
+  { name: "Adobe", ticker: "ADBE" },
+  { name: "Qualcomm", ticker: "QCOM" },
+  { name: "Texas Instruments", ticker: "TXN" },
+  { name: "Booking Holdings", ticker: "BKNG" },
+  { name: "Goldman Sachs", ticker: "GS" },
+  { name: "Citigroup", ticker: "C" },
+  { name: "Bank of America", ticker: "BAC" },
+  { name: "American Express", ticker: "AXP" },
+  { name: "General Electric", ticker: "GE" },
+  { name: "Lockheed Martin", ticker: "LMT" },
+  { name: "Raytheon Technologies", ticker: "RTX" },
+  { name: "Caterpillar", ticker: "CAT" },
+  { name: "3M", ticker: "MMM" },
+  { name: "UPS", ticker: "UPS" },
+  { name: "FedEx", ticker: "FDX" }
+
+  // You can continue to add more here
+];
+
+
+ let current;
+let score = 0;
+let streak = 0;
+let highScore = localStorage.getItem("highScore") || 0;
+let timer;
+let timeLeft = 5;
+let bonusStart;
+let paused = false;
+
+let shuffledCompanies = [];
+let currentIndex = 0;
+
+
+  const companyName = document.getElementById("companyName");
+  const userInput = document.getElementById("userInput");
+  const feedback = document.getElementById("feedback");
+  const scoreDisplay = document.getElementById("score");
+  const highScoreDisplay = document.getElementById("highScore");
+  const timerDisplay = document.getElementById("timer");
+  const timerBar = document.getElementById("timerBar");
+  const pauseBtn = document.getElementById("pauseBtn");
+  const finalScore = document.getElementById("finalScore");
+  const streakDisplay = document.getElementById("streak");
+
+  highScoreDisplay.textContent = highScore;
+
+  function getRandomCompany() {
+
+  clearInterval(timer);
+  if (paused) return;
+
+  // Reshuffle once we’ve gone through all companies
+  if (currentIndex === 0 || currentIndex >= shuffledCompanies.length) {
+    shuffledCompanies = [...companies].sort(() => Math.random() - 0.5);
+    currentIndex = 0;
+  }
+
+  current = shuffledCompanies[currentIndex++];
+  companyName.textContent = current.name;
+  userInput.value = '';
+  userInput.focus();
+  timeLeft = 5;
+  timerDisplay.textContent = timeLeft;
+  timerBar.style.width = '100%';
+  bonusStart = Date.now();
+
+  timer = setInterval(() => {
+    if (!paused) {
+      timeLeft--;
+      timerDisplay.textContent = timeLeft;
+      timerBar.style.width = (timeLeft / 5) * 100 + '%';
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        showGameOver();
+      }
+    }
+  }, 1000);
+}
+
+
+  function checkAnswer() {
+  if (paused) return;
+  clearInterval(timer);
+  const guess = userInput.value.trim().toUpperCase();
+  const correct = current.ticker;
+
+  if (guess === correct) {
+    const timeBonus = Math.max(0, 5 - Math.floor((Date.now() - bonusStart) / 1000));
+    const points = 1 + timeBonus;
+    score += points;
+    streak++;
+    feedback.textContent = `✅ Correct! +${points} pts`;
+
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem("highScore", highScore);
+      highScoreDisplay.textContent = highScore;
+    }
+
+    scoreDisplay.textContent = score;
+    streakDisplay.textContent = streak;
+const original = document.getElementById("coinSound");
+const clone = original.cloneNode(); // makes a new instance
+clone.volume = 0.4;
+clone.play().catch(e => console.warn("Audio play was blocked:", e));
+
+
+
+    setTimeout(getRandomCompany, 1000);
+
+  } else {
+    feedback.textContent = `❌ Wrong! It was ${correct}`;
+// ✅ Play "wrong" sound
+const wrong = document.getElementById("wrongSound");
+const wrongClone = wrong.cloneNode();
+wrongClone.volume = 0.5;
+wrongClone.play().catch(e => console.warn("Audio play was blocked:", e));
+
+    // ⚠️ Don't reset streak here — let the modal show it first
+    showGameOver();
+  }
+}
+
+
+  function togglePause() {
+    paused = !paused;
+    pauseBtn.textContent = paused ? "Resume" : "Pause";
+    if (!paused) getRandomCompany();
+  }
+
+  function showGameOver() {
+    finalScore.textContent = score;
+    document.getElementById('finalStreak').textContent = streak;
+    document.getElementById('gameOverModal').style.display = 'flex';
+  }
+
+  function resumeGame() {
+  document.getElementById('gameOverModal').style.display = 'none';
+  score = 0;
+  streak = 0;
+  scoreDisplay.textContent = score;
+  streakDisplay.textContent = streak;
+  getRandomCompany();
+}
+
+
+  userInput.addEventListener("keyup", function(event) {
+    if (event.key === "Enter") checkAnswer();
+  });
+
+  getRandomCompany();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+  function shareScore() {
+    const modal = document.getElementById('gameOverModal');
+    html2canvas(modal).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'guess-the-ticker-score.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  }
+
+  const quotes = [
+    "Discipline is doing what needs to be done, even when you don’t feel like doing it.",
+    "The market is a device for transferring money from the impatient to the patient. – Warren Buffett",
+    "You don't rise to the level of your goals. You fall to the level of your systems. – James Clear",
+    "Mastery is not about doing 4,000 things, it's about doing 12 things 4,000 times. – MJ DeMarco",
+    "Be fearful when others are greedy and greedy when others are fearful. – Warren Buffett",
+    "Every loss is a lesson. Stay sharp. Stay disciplined.",
+    "Mindset is what separates the best from the rest."
+  ];
+
+  function showGameOver() {
+    const finalScoreElem = document.getElementById('finalScore');
+    const finalStreakElem = document.getElementById('finalStreak');
+    const quoteDisplayElem = document.getElementById('quoteDisplay');
+
+    if (finalScoreElem && finalStreakElem && quoteDisplayElem) {
+      finalScoreElem.textContent = score;
+      finalStreakElem.textContent = streak; // ✅ No need to capture separately anymore
+      const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+      quoteDisplayElem.textContent = `"${randomQuote}"`;
+      document.getElementById('gameOverModal').style.display = 'flex';
+    } else {
+      console.error("Modal elements not found. Check your HTML element IDs.");
+    }
+  }
+</script>
+
+</body>
+</html>
+
