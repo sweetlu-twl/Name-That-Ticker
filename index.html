@@ -307,6 +307,20 @@
   </div>
 </div>
 
+<div class="modal" id="startModal" style="display: flex;">
+  <div class="modal-content">
+    <h2>🕹️ NAME THAT TICKER</h2>
+    <p>Can you match the company to its ticker symbol before time runs out?</p>
+    <p><strong>How to Play:</strong></p>
+    <ul style="text-align: left; padding-left: 20px; font-size: 0.9rem;">
+      <li>⏱ You get 5 seconds per round.</li>
+      <li>✅ Type the correct ticker. Hit Enter or click Submit.</li>
+      <li>🔥 Rack up points and build your streak.</li>
+      <li>❌ One wrong guess — game over.</li>
+    </ul>
+    <button onclick="startGame()">START GAME</button>
+  </div>
+</div>
 
 <script>
   function toggleMenu() {
@@ -401,6 +415,12 @@ let currentIndex = 0;
   const streakDisplay = document.getElementById("streak");
 
   highScoreDisplay.textContent = highScore;
+function startGame() {
+  document.getElementById('startModal').style.display = 'none';
+  paused = false; // in case it's paused from before
+  getRandomCompany(); // ✅ make sure this is now defined above
+}
+
 
   function getRandomCompany() {
 
@@ -506,7 +526,6 @@ wrongClone.play().catch(e => console.warn("Audio play was blocked:", e));
     if (event.key === "Enter") checkAnswer();
   });
 
-  getRandomCompany();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
